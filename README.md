@@ -1,1 +1,75 @@
-# Dimotion_Media
+# Dimotion
+
+Monorepo inicial para el MVP de Dimotion Media, una agencia de publicidad y producción audiovisual. Angular y Express se mantienen como aplicaciones independientes dentro de un solo repositorio Git. PostgreSQL, Auth y las migraciones usan Supabase como servicio externo.
+
+## Estructura
+
+```text
+frontend/                 Angular standalone, rutas públicas y portales
+  src/app/core/            Auth, guards y servicios globales
+  src/app/shared/          Componentes reutilizables
+  src/app/layout/          Navegación y estructura general
+  src/app/features/        public, auth, client, campaign-tracking,
+                           admin, brands, packages y models
+backend/                  API Express + TypeScript
+  src/config/              Variables de entorno y cliente Supabase
+  src/middleware/          Auth, roles, validación y errores
+  src/modules/             Campañas, marcas, paquetes, modelos,
+                           perfiles y reservas (preparado)
+  src/routes/              Registro central de rutas
+supabase/
+  migrations/              Esquema y políticas RLS versionados
+  seed.sql                 Punto de partida para datos de desarrollo
+```
+
+La navegación pública no requiere sesión. Las rutas del cliente y de administración están protegidas por sesión de Supabase y rol de perfil (`client` / `admin`). Esas guardas mejoran la navegación, pero la autorización real de datos vive en RLS y debe mantenerse también en el backend.
+
+## Requisitos
+
+- Node.js 20.19 o superior (el scaffold se generó con Angular 22).
+- npm.
+- Proyecto Supabase propio para habilitar Auth y las rutas autenticadas.
+- Figma para los diseños; los enlaces y archivos de diseño se administran por separado.
+
+## Instalación y ejecución
+
+Desde la raíz:
+
+```bash
+npm run install:all
+```
+
+En dos terminales, desde la raíz:
+
+```bash
+npm run frontend
+```
+
+```bash
+npm run backend
+```
+
+Angular queda disponible normalmente en `http://localhost:4200`; Express escucha en `http://localhost:3000`. La comprobación pública de salud es `GET http://localhost:3000/api/health`. También se puede ejecutar `npm run build` desde la raíz para compilar ambas aplicaciones.
+
+## Configuración manual
+
+1. Copia `backend/.env.example` a `backend/.env` y define `PORT`, `SUPABASE_URL` y `SUPABASE_ANON_KEY`. No se necesita una clave `service_role` y nunca debe enviarse al navegador.
+2. Copia `frontend/.env.example` como referencia y configura `supabaseUrl` y `supabaseAnonKey` en `frontend/src/environments/environment.ts`. La clave anon/pública es la única clave Supabase que debe aparecer en el frontend; la seguridad depende de RLS.
+3. Aplica las migraciones de `supabase/migrations/` al proyecto con Supabase CLI o el SQL Editor. No hay conexión remota configurada en este repositorio.
+4. Los perfiles se crean al registrar usuarios de Supabase y comienzan con el rol `client`. Asigna el rol `admin` manualmente desde un entorno administrativo de confianza; nunca permitas que un usuario cambie su propio rol.
+
+Sin credenciales, la aplicación Angular y el backend compilan y `GET /api/health` funciona. La autenticación y las rutas de recursos requieren el proyecto Supabase configurado. Las rutas de negocio aún devuelven `501 Not Implemented` explícitamente; el alcance actual es estructura, seguridad base y navegación, no la lógica completa de campañas.
+
+## Datos y seguridad
+
+- `profiles.id` referencia `auth.users.id`; no se guardan contraseñas.
+- `brands.owner_profile_id` enlaza marcas con el perfil cliente y `campaigns.brand_id` restringe campañas por marca.
+- `campaigns` referencia opcionalmente paquetes y modelos; el historial guarda cada estado inicial/cambio.
+- Los estados son `payment_received`, `production`, `editing`, `delivery` y `completed`.
+- Clientes pueden leer campañas e historial de sus marcas; solo administradores pueden insertar o cambiar campañas. El historial se registra con trigger.
+- Los paquetes activos son legibles públicamente; los modelos y operaciones administrativas están restringidos.
+- Fotografías y videos no se almacenan en PostgreSQL en este MVP. Si se requiere alojarlos, se debe evaluar Supabase Storage con políticas propias.
+
+## Diseño
+
+Usa Figma para los flujos, wireframes y sistema visual de Dimotion. No se incluye un archivo ni una URL de Figma porque no se proporcionaron credenciales o un diseño existente.

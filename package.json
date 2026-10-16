@@ -1,0 +1,12 @@
+{
+  "name": "dimotion",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MVP monorepo for Dimotion",
+  "scripts": {
+    "install:all": "npm install --prefix frontend && npm install --prefix backend",
+    "frontend": "npm --prefix frontend start",
+    "backend": "npm --prefix backend run dev",
+    "build": "npm --prefix frontend run build && npm --prefix backend run build"
+  }
+}
