@@ -1,2 +1,0 @@
--- Add approved package rows here after deciding MVP prices and descriptions.
--- Avoid inserting real client, model, or campaign data into a development seed.
