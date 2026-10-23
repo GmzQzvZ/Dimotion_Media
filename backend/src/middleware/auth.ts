@@ -36,9 +36,9 @@ export const requireAuth: RequestHandler = async (req, _res, next) => {
       .from('profiles')
       .select('role')
       .eq('id', user.id)
-      .single();
+      .maybeSingle();
     if (profileError) throw profileError;
-    if (profile.role !== 'admin' && profile.role !== 'client') {
+    if (!profile || (profile.role !== 'admin' && profile.role !== 'client')) {
       next(new AppError(403, 'El perfil no tiene un rol autorizado.'));
       return;
     }

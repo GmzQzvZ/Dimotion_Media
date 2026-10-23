@@ -12,3 +12,14 @@ export function validateBody(schema: ZodType): RequestHandler {
     next();
   };
 }
+
+export function validateParams(schema: ZodType): RequestHandler {
+  return (req, _res, next) => {
+    const result = schema.safeParse(req.params);
+    if (!result.success) {
+      next(result.error);
+      return;
+    }
+    next();
+  };
+}

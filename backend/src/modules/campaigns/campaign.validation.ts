@@ -14,8 +14,10 @@ export const createCampaignSchema = z.object({
   modelId: z.string().uuid().nullable().optional(),
   title: z.string().trim().min(1).max(160),
   description: z.string().trim().max(2000).nullable().optional(),
-});
+}).strict();
 
 export const updateCampaignStatusSchema = z.object({
   status: campaignStatusSchema,
-});
+}).strict();
+
+export const campaignIdSchema = z.object({ campaignId: z.string().uuid() });
